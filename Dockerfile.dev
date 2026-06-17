@@ -1,0 +1,32 @@
+# Development stage with hot-reload
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
+
+# Copy package files
+COPY --chown=nextjs:nodejs package*.json ./
+
+# Install all dependencies (dev + prod)
+RUN npm ci
+
+# Copy source code
+COPY --chown=nextjs:nodejs . .
+
+# Switch to non-root user
+USER nextjs
+
+# Expose port
+EXPOSE 9002
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start the dev server with turbopack
+CMD ["npm", "run", "dev"]

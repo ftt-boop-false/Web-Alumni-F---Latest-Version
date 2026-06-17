@@ -1,0 +1,23 @@
+# Settings to manage and configure a Firebase App Hosting backend.
+# https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  # Increase this value if you'd like to automatically spin up
+  # more instances in response to increased traffic.
+  maxInstances: 1
+
+# Environment variables tersedia saat runtime di server.
+# https://firebase.google.com/docs/app-hosting/configure#user-defined-environment
+env:
+  # URL Web App Google Apps Script untuk Tracer Study -> Google Spreadsheet.
+  # Lihat docs/tracer-study-google-sheet.md.
+  #
+  # Disarankan menyimpannya sebagai secret di Cloud Secret Manager, lalu rujuk
+  # di sini. Buat secret sekali dengan:
+  #   firebase apphosting:secrets:set TRACER_STUDY_SHEET_URL
+  # dan beri akses backend:
+  #   firebase apphosting:secrets:grantaccess TRACER_STUDY_SHEET_URL --backend <nama-backend>
+  - variable: TRACER_STUDY_SHEET_URL
+    secret: TRACER_STUDY_SHEET_URL
+    availability:
+      - RUNTIME
