@@ -1,17 +1,20 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { HomeView } from '@/components/views/Home';
 import { NewsView } from '@/components/views/News';
-import { CareerView } from '@/components/views/CareerView';
-import { AlumniConnectView } from '@/components/views/AlumniConnectView';
+import { CommunityView } from '@/components/views/CommunityView';
 import { ResearchForumView } from '@/components/views/ResearchForumView';
 import { TracerStudyView } from '@/components/views/TracerStudyView';
+import { AuthView } from '@/components/views/AuthView';
+import { DashboardView } from '@/components/views/DashboardView';
+import { WakafView } from '@/components/views/WakafView';
 import { ProtectedGate } from '@/components/views/protected/ProtectedGate';
-import { LoginModal } from '@/components/auth/LoginModal';
-import { RegisterModal } from '@/components/auth/RegisterModal';
+import { ProfileCompletionGate, MandatoryProfile } from '@/components/ProfileCompletionGate';
 import { User, Message } from '@/lib/data';
+import { auth, fetchProfile, buildUser, isAdminEmail, isProfileComplete } from '@/lib/firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,22 +29,46 @@ const EmptyPlaceholder = ({ name }: { name: string }) => (
 export default function AlumniPortal() {
   const [activeView, setActiveView] = useState('beranda');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [needsProfile, setNeedsProfile] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const { toast } = useToast();
 
+  // Pulihkan sesi login dari Firebase saat halaman dibuka, dan ikuti perubahannya.
+  // Sekaligus cek apakah profil wajib (status, angkatan, prodi) sudah lengkap.
+  useEffect(() => {
+    if (!auth) return;
+    const unsub = onAuthStateChanged(auth, async (fbUser) => {
+      if (!fbUser) {
+        setCurrentUser(null);
+        setNeedsProfile(false);
+        return;
+      }
+      const profile = (await fetchProfile(fbUser.uid)) ?? {};
+      setCurrentUser(buildUser(fbUser.uid, fbUser.email, profile));
+      setNeedsProfile(!isAdminEmail(fbUser.email) && !isProfileComplete(profile));
+    });
+    return () => unsub();
+  }, []);
+
+  const goToAuth = (mode: 'login' | 'register') => {
+    setAuthMode(mode);
+    setActiveView('auth');
+  };
+
   const handleLogin = (user: User) => {
     setCurrentUser(user);
-    setIsLoginModalOpen(false);
+    setActiveView('dashboard');
     toast({
       title: "Login Berhasil",
       description: `Selamat datang kembali, ${user.nama}!`,
     });
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (auth) await signOut(auth);
     setCurrentUser(null);
+    setNeedsProfile(false);
     setActiveView('beranda');
     toast({
       title: "Logged Out",
@@ -49,9 +76,15 @@ export default function AlumniPortal() {
     });
   };
 
-  const handleRegisterSubmit = (data: any) => {
-    console.log("Registration submitted:", data);
-    // In a real app, this would send data to the backend
+  const handleProfileComplete = (data: MandatoryProfile) => {
+    setNeedsProfile(false);
+    setCurrentUser((prev) => prev ? {
+      ...prev,
+      role: data.status as User['role'],
+      angkatan: data.angkatan,
+      prodi: data.prodi,
+    } : prev);
+    setActiveView('dashboard');
   };
 
   const unreadMessageCount = useMemo(() => {
@@ -63,48 +96,73 @@ export default function AlumniPortal() {
     switch (activeView) {
       case 'beranda':
         return (
-          <HomeView 
-            onStart={() => setIsLoginModalOpen(true)} 
+          <HomeView
+            onStart={() => goToAuth('login')}
             onNavigateToNews={() => setActiveView('berita')}
-            onRegister={() => setIsRegisterModalOpen(true)}
+            onRegister={() => goToAuth('register')}
+            currentUser={currentUser}
+            onOpenDashboard={() => setActiveView('dashboard')}
+            onNavigate={setActiveView}
+          />
+        );
+      case 'auth':
+        return (
+          <AuthView
+            onLogin={handleLogin}
+            initialMode={authMode}
           />
         );
       case 'berita':
-        return <NewsView />;
+        return <NewsView currentUser={currentUser} />;
+      case 'wakaf':
+        return <WakafView currentUser={currentUser} onLoginClick={() => goToAuth('login')} />;
+      case 'community':
       case 'career':
-        return <CareerView currentUser={currentUser} onLoginClick={() => setIsLoginModalOpen(true)} />;
       case 'alumniconnect':
-        return <AlumniConnectView currentUser={currentUser} onLoginClick={() => setIsLoginModalOpen(true)} messages={messages} setMessages={setMessages} />;
+        return (
+          <CommunityView
+            key={activeView}
+            currentUser={currentUser}
+            onLoginClick={() => goToAuth('login')}
+            messages={messages}
+            setMessages={setMessages}
+            initialTab={activeView === 'alumniconnect' ? 'connect' : 'career'}
+            unreadCount={unreadMessageCount}
+          />
+        );
       case 'riset':
         return (
-          <ProtectedGate currentUser={currentUser} onLoginClick={() => setIsLoginModalOpen(true)}>
-            <ResearchForumView currentUser={currentUser} onLoginClick={() => setIsLoginModalOpen(true)} />
+          <ProtectedGate currentUser={currentUser} onLoginClick={() => goToAuth('login')}>
+            <ResearchForumView currentUser={currentUser} onLoginClick={() => goToAuth('login')} />
           </ProtectedGate>
         );
       case 'expert':
         return (
-          <ProtectedGate currentUser={currentUser} onLoginClick={() => setIsLoginModalOpen(true)}>
+          <ProtectedGate currentUser={currentUser} onLoginClick={() => goToAuth('login')}>
             <EmptyPlaceholder name="Expert Registry" />
           </ProtectedGate>
         );
       case 'tracer':
         return (
-          <ProtectedGate currentUser={currentUser} onLoginClick={() => setIsLoginModalOpen(true)}>
-            <TracerStudyView currentUser={currentUser} onLoginClick={() => setIsLoginModalOpen(true)} />
+          <ProtectedGate currentUser={currentUser} onLoginClick={() => goToAuth('login')}>
+            <TracerStudyView currentUser={currentUser} onLoginClick={() => goToAuth('login')} />
           </ProtectedGate>
         );
       case 'dashboard':
         return (
-          <ProtectedGate currentUser={currentUser} onLoginClick={() => setIsLoginModalOpen(true)}>
-            <EmptyPlaceholder name="Dashboard" />
+          <ProtectedGate currentUser={currentUser} onLoginClick={() => goToAuth('login')}>
+            <DashboardView currentUser={currentUser} />
           </ProtectedGate>
         );
       default:
         return (
-          <HomeView 
-            onStart={() => setIsLoginModalOpen(true)} 
+          <HomeView
+            onStart={() => goToAuth('login')}
             onNavigateToNews={() => setActiveView('berita')}
-            onRegister={() => setIsRegisterModalOpen(true)}
+            onRegister={() => goToAuth('register')}
+            currentUser={currentUser}
+            onOpenDashboard={() => setActiveView('dashboard')}
+            onNavigate={setActiveView}
           />
         );
     }
@@ -112,31 +170,24 @@ export default function AlumniPortal() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Navbar 
-        activeView={activeView} 
-        setActiveView={setActiveView} 
+      <Navbar
+        activeView={activeView}
+        setActiveView={setActiveView}
         currentUser={currentUser}
-        onLoginClick={() => setIsLoginModalOpen(true)}
+        onLoginClick={() => goToAuth('login')}
         onLogout={handleLogout}
         unreadCount={unreadMessageCount}
       />
-      
+
       <div className="pb-20">
         {renderView()}
       </div>
 
-      {isLoginModalOpen && (
-        <LoginModal 
-          onLogin={handleLogin} 
-          onClose={() => setIsLoginModalOpen(false)} 
-        />
-      )}
-
-      {isRegisterModalOpen && (
-        <RegisterModal 
-          isOpen={isRegisterModalOpen}
-          onClose={() => setIsRegisterModalOpen(false)}
-          onRegister={handleRegisterSubmit}
+      {needsProfile && currentUser && (
+        <ProfileCompletionGate
+          currentUser={currentUser}
+          onComplete={handleProfileComplete}
+          onLogout={handleLogout}
         />
       )}
 

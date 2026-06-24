@@ -4,14 +4,14 @@ import React from 'react';
 import { cn } from "@/lib/utils";
 import { User } from '@/lib/data';
 import { 
-  Home, 
-  Newspaper, 
-  Briefcase, 
-  Users, 
-  ClipboardCheck, 
-  FlaskConical, 
-  MessageSquare, 
+  Home,
+  Newspaper,
+  Briefcase,
+  Users,
+  ClipboardCheck,
+  FlaskConical,
   LayoutDashboard,
+  Landmark,
   Lock,
   LogOut,
   User as UserIcon,
@@ -33,14 +33,19 @@ interface NavbarProps {
 export const Navbar = ({ activeView, setActiveView, currentUser, onLoginClick, onLogout, unreadCount = 0 }: NavbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
+  // 'community' juga aktif saat halaman lama 'career'/'alumniconnect' dibuka (mis. dari kartu Beranda).
+  const isActive = (id: string) =>
+    activeView === id ||
+    (id === 'community' && (activeView === 'career' || activeView === 'alumniconnect'));
+
   const navItems = [
     { id: 'beranda', label: 'Beranda', icon: <Home className="w-4 h-4" />, protected: false },
     { id: 'berita', label: 'Berita', icon: <Newspaper className="w-4 h-4" />, protected: false },
-    { id: 'career', label: 'Career Hub', icon: <Briefcase className="w-4 h-4" />, protected: true },
+    { id: 'community', label: 'Career & Connect', icon: <Briefcase className="w-4 h-4" />, protected: false },
     { id: 'expert', label: 'Expert Registry', icon: <Users className="w-4 h-4" />, protected: true },
-    { id: 'alumniconnect', label: 'AlumniConnect', icon: <MessageSquare className="w-4 h-4" />, protected: false },
     { id: 'tracer', label: 'Tracer Study', icon: <ClipboardCheck className="w-4 h-4" />, protected: true },
     { id: 'riset', label: 'Forum Riset', icon: <FlaskConical className="w-4 h-4" />, protected: true },
+    { id: 'wakaf', label: 'Dana Abadi', icon: <Landmark className="w-4 h-4" />, protected: false },
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" />, protected: true },
   ];
 
@@ -62,21 +67,21 @@ export const Navbar = ({ activeView, setActiveView, currentUser, onLoginClick, o
                 onClick={() => setActiveView(item.id)}
                 className={cn(
                   "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors relative",
-                  activeView === item.id 
-                    ? "text-red-800 bg-red-50" 
+                  isActive(item.id)
+                    ? "text-red-800 bg-red-50"
                     : "text-gray-600 hover:text-red-700 hover:bg-gray-50",
                   item.protected && !currentUser && "opacity-70"
                 )}
               >
                 {item.icon}
                 {item.label}
-                {item.id === 'alumniconnect' && unreadCount > 0 && (
+                {item.id === 'community' && unreadCount > 0 && (
                   <span className="ml-1 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
                     {unreadCount}
                   </span>
                 )}
                 {item.protected && !currentUser && <Lock className="w-3 h-3 ml-1 text-red-600" />}
-                {activeView === item.id && (
+                {isActive(item.id) && (
                   <span className="absolute bottom-0 left-0 w-full h-0.5 bg-red-800 rounded-full" />
                 )}
               </button>
@@ -124,12 +129,12 @@ export const Navbar = ({ activeView, setActiveView, currentUser, onLoginClick, o
               }}
               className={cn(
                 "flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium",
-                activeView === item.id ? "bg-red-50 text-red-800" : "text-gray-600"
+                isActive(item.id) ? "bg-red-50 text-red-800" : "text-gray-600"
               )}
             >
               {item.icon}
               {item.label}
-              {item.id === 'alumniconnect' && unreadCount > 0 && (
+              {item.id === 'community' && unreadCount > 0 && (
                 <span className="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">
                   {unreadCount}
                 </span>
