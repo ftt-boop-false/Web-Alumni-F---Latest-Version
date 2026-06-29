@@ -10,6 +10,7 @@ import { TracerStudyView } from '@/components/views/TracerStudyView';
 import { AuthView } from '@/components/views/AuthView';
 import { DashboardView } from '@/components/views/DashboardView';
 import { WakafView } from '@/components/views/WakafView';
+import { DanaFormulirView } from '@/components/views/DanaFormulirView';
 import { ProtectedGate } from '@/components/views/protected/ProtectedGate';
 import { ProfileCompletionGate, MandatoryProfile } from '@/components/ProfileCompletionGate';
 import { User, Message } from '@/lib/data';
@@ -115,7 +116,9 @@ export default function AlumniPortal() {
       case 'berita':
         return <NewsView currentUser={currentUser} />;
       case 'wakaf':
-        return <WakafView currentUser={currentUser} onLoginClick={() => goToAuth('login')} />;
+        return <WakafView currentUser={currentUser} onLoginClick={() => goToAuth('login')} onOpenFormulir={() => setActiveView('dana-formulir')} />;
+      case 'dana-formulir':
+        return <DanaFormulirView onBack={() => setActiveView('wakaf')} />;
       case 'community':
       case 'career':
       case 'alumniconnect':

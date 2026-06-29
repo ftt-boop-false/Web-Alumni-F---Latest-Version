@@ -13,15 +13,18 @@ import { db } from './firebase';
  */
 
 export type WakafStatus = 'Menunggu Konfirmasi' | 'Terkonfirmasi';
-export type WakafJenis = 'Donasi' | 'Wakaf Tunai';
+// Netral & inklusif (selaras PRD): "Donasi" disalurkan untuk program,
+// "Dana Abadi" pokoknya dijaga, hanya hasilnya yang dipakai.
+export type WakafJenis = 'Donasi' | 'Dana Abadi';
 
 export type WakafRecord = {
   id: string;
   uid?: string;
-  nama: string;          // nama tampil (atau "Hamba Allah" bila anonim)
+  nama: string;          // nama tampil (atau "Anonim" bila disembunyikan)
   jumlah: number;        // dalam Rupiah
   dana: string;          // key dari WAKAF_FUNDS
   jenis: WakafJenis;
+  kontak?: string;       // email/WhatsApp untuk konfirmasi (tidak ditampilkan publik)
   pesan?: string;
   status: WakafStatus;
   createdAt?: number;
@@ -71,12 +74,16 @@ export async function deleteWakaf(id: string): Promise<void> {
   await deleteDoc(doc(db, 'wakaf', id));
 }
 
-/** Hitung total pokok terkonfirmasi per dana + keseluruhan. */
+/** Hitung total pokok terkonfirmasi per dana (+ jumlah kontributor per dana). */
 export function summarize(records: WakafRecord[]) {
   const confirmed = records.filter((r) => r.status === 'Terkonfirmasi');
   const totalPokok = confirmed.reduce((s, r) => s + (r.jumlah || 0), 0);
   const perFund: Record<string, number> = {};
-  for (const f of WAKAF_FUNDS) perFund[f.key] = 0;
-  for (const r of confirmed) perFund[r.dana] = (perFund[r.dana] || 0) + (r.jumlah || 0);
-  return { confirmed, totalPokok, perFund, jumlahKontribusi: confirmed.length };
+  const perFundCount: Record<string, number> = {};
+  for (const f of WAKAF_FUNDS) { perFund[f.key] = 0; perFundCount[f.key] = 0; }
+  for (const r of confirmed) {
+    perFund[r.dana] = (perFund[r.dana] || 0) + (r.jumlah || 0);
+    perFundCount[r.dana] = (perFundCount[r.dana] || 0) + 1;
+  }
+  return { confirmed, totalPokok, perFund, perFundCount, jumlahKontribusi: confirmed.length };
 }

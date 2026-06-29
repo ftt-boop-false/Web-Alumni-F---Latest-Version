@@ -7,7 +7,11 @@ export const STATUS_OPTIONS = [
 
 // Program studi terakhir (S1 / S2 / S3) di FTT IPB.
 export const PRODI_OPTIONS = [
-  'Teknologi Pangan S1',
+  'Keteknikan Pertanian',
+  'Teknologi Hasil Pertanian (THP)',
+  'Mekanisasi Pertanian (MP)',
+  'Teknologi Pangan dan Gizi',
+  'Teknik Mesin dan Biosistem','Teknologi Pangan S1',
   'Teknik Pertanian dan Biosistem S1',
   'Teknik Industri Pertanian S1',
   'Teknik Sipil dan Lingkungan S1',
@@ -23,4 +27,5 @@ export const PRODI_OPTIONS = [
   'Ilmu Keteknikan Pertanian S3',
   'Ilmu Pangan S3',
   'Teknik Industri Pertanian S3',
+
 ];
