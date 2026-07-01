@@ -91,6 +91,32 @@ service cloud.firestore {
         && request.resource.data.jumlah > 0;
       allow update, delete: if isAdmin();
     }
+
+    // Forum demo (Career Hub, AlumniConnect, Forum Riset). Model "dokumen utuh":
+    // satu thread/loker = satu dokumen (likes, reply, proposal tersimpan di dalamnya).
+    //  - baca: publik
+    //  - buat/ubah: user login (like/reply orang lain pun mengubah dok induk)
+    //  - hapus: admin atau pemilik
+    match /jobs/{id} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if isAdmin() || (request.auth != null && resource.data.posted_by == request.auth.uid);
+    }
+    match /connectThreads/{id} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if isAdmin() || (request.auth != null && resource.data.authorId == request.auth.uid);
+    }
+    match /risetThreads/{id} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+      allow delete: if isAdmin() || (request.auth != null && resource.data.postedBy == request.auth.uid);
+    }
+    // Registry penulis forum (nama/peran/avatar) agar tampil di UI.
+    match /forumUsers/{id} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
   }
 }
 ```

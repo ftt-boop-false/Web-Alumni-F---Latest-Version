@@ -33,18 +33,20 @@ interface NavbarProps {
 export const Navbar = ({ activeView, setActiveView, currentUser, onLoginClick, onLogout, unreadCount = 0 }: NavbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
-  // 'community' juga aktif saat halaman lama 'career'/'alumniconnect' dibuka (mis. dari kartu Beranda).
+  // 'career' aktif juga untuk id lama 'community'; 'riset' (Research & Alumni Connect)
+  // aktif juga saat tab AlumniConnect ('alumniconnect') dibuka, mis. dari kartu Beranda.
   const isActive = (id: string) =>
     activeView === id ||
-    (id === 'community' && (activeView === 'career' || activeView === 'alumniconnect'));
+    (id === 'career' && activeView === 'community') ||
+    (id === 'riset' && activeView === 'alumniconnect');
 
   const navItems = [
     { id: 'beranda', label: 'Beranda', icon: <Home className="w-4 h-4" />, protected: false },
     { id: 'berita', label: 'Berita', icon: <Newspaper className="w-4 h-4" />, protected: false },
-    { id: 'community', label: 'Career & Connect', icon: <Briefcase className="w-4 h-4" />, protected: false },
+    { id: 'career', label: 'Career Hub', icon: <Briefcase className="w-4 h-4" />, protected: false },
     { id: 'expert', label: 'Expert Registry', icon: <Users className="w-4 h-4" />, protected: true },
     { id: 'tracer', label: 'Tracer Study', icon: <ClipboardCheck className="w-4 h-4" />, protected: true },
-    { id: 'riset', label: 'Forum Riset', icon: <FlaskConical className="w-4 h-4" />, protected: true },
+    { id: 'riset', label: 'Research & Alumni Connect', icon: <FlaskConical className="w-4 h-4" />, protected: false },
     { id: 'wakaf', label: 'Dana Abadi', icon: <Landmark className="w-4 h-4" />, protected: false },
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" />, protected: true },
   ];
@@ -75,7 +77,7 @@ export const Navbar = ({ activeView, setActiveView, currentUser, onLoginClick, o
               >
                 {item.icon}
                 {item.label}
-                {item.id === 'community' && unreadCount > 0 && (
+                {item.id === 'riset' && unreadCount > 0 && (
                   <span className="ml-1 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
                     {unreadCount}
                   </span>

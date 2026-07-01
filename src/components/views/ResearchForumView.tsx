@@ -12,6 +12,7 @@ import {
   ResearchOutput,
   Reply
 } from '@/lib/data';
+import { useBoard } from '@/lib/use-board';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +35,8 @@ import {
   Mail,
   GraduationCap,
   Building,
-  Info
+  Info,
+  Trash2
 } from 'lucide-react';
 import { 
   Dialog, 
@@ -74,7 +76,8 @@ const OUTPUTS: ResearchOutput[] = ['Skripsi', 'Tesis', 'Paper Jurnal', 'Prototip
 
 export const ResearchForumView = ({ currentUser, onLoginClick }: ResearchForumViewProps) => {
   const { toast } = useToast();
-  const [threads, setThreads] = useState<ResearchThread[]>(RESEARCH_THREADS);
+  const isAdmin = currentUser?.role === 'admin';
+  const [threads, setThreads] = useBoard<ResearchThread>('risetThreads', RESEARCH_THREADS);
   const [activeStatus, setActiveStatus] = useState<ResearchStatus | 'Semua'>('Semua');
   const [activeCategory, setActiveCategory] = useState<ResearchCategory | 'Semua'>('Semua');
   const [searchTerm, setSearchTerm] = useState('');
@@ -277,6 +280,15 @@ export const ResearchForumView = ({ currentUser, onLoginClick }: ResearchForumVi
                         <Badge variant="secondary" className="bg-red-50 text-red-700 gap-1">
                           <Database className="w-3 h-3" /> Data Tersedia
                         </Badge>
+                      )}
+                      {(isAdmin || currentUser?.id === thread.postedBy) && (
+                        <button
+                          title="Hapus topik"
+                          onClick={(e) => { e.stopPropagation(); if (window.confirm('Hapus topik riset ini?')) setThreads(threads.filter(t => t.id !== thread.id)); }}
+                          className="ml-1 text-gray-300 hover:text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       )}
                     </div>
                     <h3 className={cn("font-bold text-gray-900 leading-tight mb-2", isExpanded ? "text-2xl" : "text-lg")}>

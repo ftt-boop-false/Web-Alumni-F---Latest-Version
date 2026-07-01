@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { FORUM_THREADS, USERS, Thread, Reply, User, ThreadCategory, Message, Report } from '@/lib/data';
+import { useBoard } from '@/lib/use-board';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -54,7 +55,8 @@ const CATEGORIES: (ThreadCategory | 'Semua')[] = ['Semua', 'Rekrutmen', 'Mitra B
 
 export const AlumniConnectView = ({ currentUser, onLoginClick, messages, setMessages }: AlumniConnectViewProps) => {
   const { toast } = useToast();
-  const [threads, setThreads] = useState<Thread[]>(FORUM_THREADS);
+  const isAdmin = currentUser?.role === 'admin';
+  const [threads, setThreads] = useBoard<Thread>('connectThreads', FORUM_THREADS);
   const [activeCategory, setActiveCategory] = useState<ThreadCategory | 'Semua'>('Semua');
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedThreadId, setExpandedThreadId] = useState<number | null>(null);
@@ -436,11 +438,10 @@ export const AlumniConnectView = ({ currentUser, onLoginClick, messages, setMess
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400"><MoreVertical className="w-4 h-4" /></Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            {currentUser?.id === thread.authorId && (
+                            {(currentUser?.id === thread.authorId || isAdmin) && (
                               <>
                                 <DropdownMenuItem onClick={() => { setSolveTarget(thread.id); setIsSolveModalOpen(true); }}>Tandai Terjawab</DropdownMenuItem>
-                                <DropdownMenuItem>Edit Thread</DropdownMenuItem>
-                                <DropdownMenuItem className="text-red-600" onClick={() => setThreads(threads.filter(t => t.id !== thread.id))}>Hapus Thread</DropdownMenuItem>
+                                <DropdownMenuItem className="text-red-600" onClick={() => setThreads(threads.filter(t => t.id !== thread.id))}>Hapus Thread{isAdmin && currentUser?.id !== thread.authorId ? ' (Admin)' : ''}</DropdownMenuItem>
                               </>
                             )}
                             <DropdownMenuItem onClick={() => { setReportTarget({ id: thread.id, type: 'thread' }); setIsReportModalOpen(true); }}>
@@ -480,9 +481,19 @@ export const AlumniConnectView = ({ currentUser, onLoginClick, messages, setMess
                                         <p className="text-[10px] text-gray-400">{reply.timestamp}</p>
                                       </div>
                                     </div>
-                                    <button onClick={() => { setReportTarget({ id: reply.id, type: 'reply' }); setIsReportModalOpen(true); }}>
-                                      <Flag className="w-3 h-3 text-gray-300 hover:text-red-400" />
-                                    </button>
+                                    <div className="flex gap-2">
+                                      <button onClick={() => { setReportTarget({ id: reply.id, type: 'reply' }); setIsReportModalOpen(true); }}>
+                                        <Flag className="w-3 h-3 text-gray-300 hover:text-red-400" />
+                                      </button>
+                                      {(isAdmin || currentUser?.id === reply.authorId) && (
+                                        <button
+                                          title="Hapus balasan"
+                                          onClick={() => setThreads(threads.map(t => t.id === thread.id ? { ...t, replies: t.replies.filter(r => r.id !== reply.id && r.parentId !== reply.id) } : t))}
+                                        >
+                                          <X className="w-3 h-3 text-gray-300 hover:text-red-500" />
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
                                   <p className="text-gray-700 text-sm mb-3 leading-relaxed">{reply.content}</p>
                                   <div className="flex items-center gap-4">

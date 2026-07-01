@@ -4,8 +4,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { HomeView } from '@/components/views/Home';
 import { NewsView } from '@/components/views/News';
-import { CommunityView } from '@/components/views/CommunityView';
-import { ResearchForumView } from '@/components/views/ResearchForumView';
+import { CareerView } from '@/components/views/CareerView';
+import { ResearchConnectView } from '@/components/views/ResearchConnectView';
 import { TracerStudyView } from '@/components/views/TracerStudyView';
 import { AuthView } from '@/components/views/AuthView';
 import { DashboardView } from '@/components/views/DashboardView';
@@ -15,6 +15,7 @@ import { ProtectedGate } from '@/components/views/protected/ProtectedGate';
 import { ProfileCompletionGate, MandatoryProfile } from '@/components/ProfileCompletionGate';
 import { User, Message } from '@/lib/data';
 import { auth, fetchProfile, buildUser, isAdminEmail, isProfileComplete } from '@/lib/firebase';
+import { registerForumUser } from '@/lib/board-store';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
@@ -46,7 +47,9 @@ export default function AlumniPortal() {
         return;
       }
       const profile = (await fetchProfile(fbUser.uid)) ?? {};
-      setCurrentUser(buildUser(fbUser.uid, fbUser.email, profile));
+      const u = buildUser(fbUser.uid, fbUser.email, profile);
+      setCurrentUser(u);
+      registerForumUser(u);
       setNeedsProfile(!isAdminEmail(fbUser.email) && !isProfileComplete(profile));
     });
     return () => unsub();
@@ -121,23 +124,19 @@ export default function AlumniPortal() {
         return <DanaFormulirView onBack={() => setActiveView('wakaf')} />;
       case 'community':
       case 'career':
+        return <CareerView currentUser={currentUser} onLoginClick={() => goToAuth('login')} />;
+      case 'riset':
       case 'alumniconnect':
         return (
-          <CommunityView
+          <ResearchConnectView
             key={activeView}
             currentUser={currentUser}
             onLoginClick={() => goToAuth('login')}
             messages={messages}
             setMessages={setMessages}
-            initialTab={activeView === 'alumniconnect' ? 'connect' : 'career'}
+            initialTab={activeView === 'alumniconnect' ? 'connect' : 'riset'}
             unreadCount={unreadMessageCount}
           />
-        );
-      case 'riset':
-        return (
-          <ProtectedGate currentUser={currentUser} onLoginClick={() => goToAuth('login')}>
-            <ResearchForumView currentUser={currentUser} onLoginClick={() => goToAuth('login')} />
-          </ProtectedGate>
         );
       case 'expert':
         return (

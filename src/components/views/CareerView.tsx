@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { JOBS, USERS, JobListing, User, JobStatus, ApplyMethod } from '@/lib/data';
+import { useBoard } from '@/lib/use-board';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -52,7 +53,7 @@ interface CareerViewProps {
 
 export const CareerView = ({ currentUser, onLoginClick }: CareerViewProps) => {
   const { toast } = useToast();
-  const [jobs, setJobs] = useState<JobListing[]>(JOBS);
+  const [jobs, setJobs] = useBoard<JobListing>('jobs', JOBS);
   const [activeTab, setActiveTab] = useState<'all' | 'admin' | 'my'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('Semua');
@@ -213,7 +214,7 @@ export const CareerView = ({ currentUser, onLoginClick }: CareerViewProps) => {
                 <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {job.applicants} Pelamar</span>
               </div>
               <div className="flex gap-2">
-                {isOwner && (
+                {(isOwner || isAdmin) && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400"><MoreVertical className="w-4 h-4" /></Button>
@@ -221,6 +222,9 @@ export const CareerView = ({ currentUser, onLoginClick }: CareerViewProps) => {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => { setFormData(job); setIsFormOpen(true); }}>Edit Loker</DropdownMenuItem>
                       <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteJob(job.id)}>Tutup Loker</DropdownMenuItem>
+                      {isAdmin && (
+                        <DropdownMenuItem className="text-red-600" onClick={() => setJobs(jobs.filter(j => j.id !== job.id))}>Hapus Permanen (Admin)</DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}

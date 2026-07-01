@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth, User as FirebaseUser } from 'firebase/auth';
-import { getFirestore, Firestore, doc, getDoc, setDoc } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, Firestore, doc, getDoc, setDoc } from 'firebase/firestore';
 import { User } from './data';
 
 /**
@@ -30,7 +30,18 @@ const app: FirebaseApp | null = isFirebaseConfigured
   : null;
 
 export const auth: Auth | null = app ? getAuth(app) : null;
-export const db: Firestore | null = app ? getFirestore(app) : null;
+
+// ignoreUndefinedProperties: agar objek dengan field undefined (mis. data demo
+// forum yang dipersist apa adanya) tidak ditolak Firestore. initializeFirestore
+// hanya boleh dipanggil sekali per app — saat hot-reload, fallback ke getFirestore.
+function makeDb(a: FirebaseApp): Firestore {
+  try {
+    return initializeFirestore(a, { ignoreUndefinedProperties: true });
+  } catch {
+    return getFirestore(a);
+  }
+}
+export const db: Firestore | null = app ? makeDb(app) : null;
 
 export type Profile = {
   nama?: string;

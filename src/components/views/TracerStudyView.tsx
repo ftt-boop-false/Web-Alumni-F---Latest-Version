@@ -36,6 +36,7 @@ interface FormData {
   namaPerusahaan: string;
   jabatan: string;
   sektor: string;
+  sektorLain: string;
   kesesuaianBidang: number;
   // C
   relevansiKurikulum: number;
@@ -48,6 +49,7 @@ interface FormData {
   kesiapanKerja: number;
   // D
   kompetensiDigunakan: string[];
+  kompetensiLain: string;
   ikutPelatihan: string;
   detailPelatihan: string;
   kontribusiPendidikan: number;
@@ -149,6 +151,7 @@ export const TracerStudyView = ({ currentUser }: TracerStudyViewProps) => {
     namaPerusahaan: '',
     jabatan: currentUser?.jabatan ?? '',
     sektor: '',
+    sektorLain: '',
     kesesuaianBidang: 0,
     relevansiKurikulum: 0,
     matakuliahBerguna: '',
@@ -159,6 +162,7 @@ export const TracerStudyView = ({ currentUser }: TracerStudyViewProps) => {
     softSkill: 0,
     kesiapanKerja: 0,
     kompetensiDigunakan: [],
+    kompetensiLain: '',
     ikutPelatihan: '',
     detailPelatihan: '',
     kontribusiPendidikan: 0,
@@ -394,7 +398,7 @@ export const TracerStudyView = ({ currentUser }: TracerStudyViewProps) => {
               <div className="space-y-2">
                 <Label>7. Status pekerjaan Anda saat ini <span className="text-red-500">*</span></Label>
                 <RadioGroup value={form.statusPekerjaan} onValueChange={(v) => set('statusPekerjaan', v)} className="space-y-2">
-                  {['Bekerja penuh waktu', 'Bekerja paruh waktu', 'Wirausaha', 'Sedang studi lanjut', 'Belum bekerja'].map((opt) => (
+                  {['Bekerja penuh waktu', 'Bekerja paruh waktu', 'Wirausaha', 'Pekerja lepas', 'Sedang studi lanjut', 'Belum bekerja'].map((opt) => (
                     <div key={opt} className="flex items-center space-x-2">
                       <RadioGroupItem value={opt} id={`sp-${opt}`} />
                       <Label htmlFor={`sp-${opt}`} className="font-normal cursor-pointer">{opt}</Label>
@@ -454,6 +458,14 @@ export const TracerStudyView = ({ currentUser }: TracerStudyViewProps) => {
                     ))}
                   </SelectContent>
                 </Select>
+                {form.sektor === 'Lainnya' && (
+                  <Input
+                    className="mt-2"
+                    value={form.sektorLain}
+                    onChange={(e) => set('sektorLain', e.target.value)}
+                    placeholder="Sebutkan sektor lainnya..."
+                  />
+                )}
               </div>
 
               <div className="space-y-2">
@@ -576,6 +588,14 @@ export const TracerStudyView = ({ currentUser }: TracerStudyViewProps) => {
                     </div>
                   ))}
                 </div>
+                {form.kompetensiDigunakan.includes('Lainnya') && (
+                  <Input
+                    className="mt-2"
+                    value={form.kompetensiLain}
+                    onChange={(e) => set('kompetensiLain', e.target.value)}
+                    placeholder="Sebutkan kompetensi lainnya..."
+                  />
+                )}
               </div>
 
               <div className="space-y-2">

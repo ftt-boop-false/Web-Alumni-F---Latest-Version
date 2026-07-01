@@ -61,6 +61,7 @@ export const HomeView = ({ onStart, onNavigateToNews, onRegister, currentUser, o
         </div>
         
         <div className="max-w-4xl mx-auto text-center relative z-10">
+          <img src="/logo.svg" alt="Logo Alumni Hub F" className="h-28 w-28 mx-auto mb-5 drop-shadow-xl" />
           <Badge className="mb-6 bg-amber-500/20 text-amber-200 border-amber-500/30 hover:bg-amber-500/30 px-4 py-1 inline-flex items-center">
             Portal Resmi Alumni Hub <span className="text-xl font-black ml-1 text-amber-400 drop-shadow-sm">F</span>
           </Badge>

@@ -1,36 +1,36 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Briefcase, MessageSquare } from 'lucide-react';
+import { FlaskConical, MessageSquare } from 'lucide-react';
 import { User, Message } from '@/lib/data';
-import { CareerView } from './CareerView';
+import { ResearchForumView } from './ResearchForumView';
 import { AlumniConnectView } from './AlumniConnectView';
 import { cn } from '@/lib/utils';
 
-export type CommunityTab = 'career' | 'connect';
+export type RCTab = 'riset' | 'connect';
 
-interface CommunityViewProps {
+interface ResearchConnectViewProps {
   currentUser: User | null;
   onLoginClick: () => void;
   messages: Message[];
   setMessages: (msgs: Message[]) => void;
-  initialTab?: CommunityTab;
+  initialTab?: RCTab;
   unreadCount?: number;
 }
 
 /**
- * Gabungan dua halaman komunitas dalam satu navigasi:
- *  - Career Hub  (lowongan kerja)
- *  - AlumniConnect (forum diskusi & networking)
- * Pengguna berpindah lewat tab di bagian atas, tanpa menambah item navbar.
+ * Gabungan dua papan dalam satu navigasi "Research & Alumni Connect":
+ *  - Forum Riset (ResearchForumView)
+ *  - AlumniConnect (AlumniConnectView)
+ * Pengguna berpindah lewat tab di bagian atas.
  */
-export const CommunityView = ({
-  currentUser, onLoginClick, messages, setMessages, initialTab = 'career', unreadCount = 0,
-}: CommunityViewProps) => {
-  const [tab, setTab] = useState<CommunityTab>(initialTab);
+export const ResearchConnectView = ({
+  currentUser, onLoginClick, messages, setMessages, initialTab = 'riset', unreadCount = 0,
+}: ResearchConnectViewProps) => {
+  const [tab, setTab] = useState<RCTab>(initialTab);
 
-  const tabs: { id: CommunityTab; label: string; icon: React.ReactNode; badge?: number }[] = [
-    { id: 'career', label: 'Career Hub', icon: <Briefcase className="w-4 h-4" /> },
+  const tabs: { id: RCTab; label: string; icon: React.ReactNode; badge?: number }[] = [
+    { id: 'riset', label: 'Forum Riset', icon: <FlaskConical className="w-4 h-4" /> },
     { id: 'connect', label: 'AlumniConnect', icon: <MessageSquare className="w-4 h-4" />, badge: unreadCount },
   ];
 
@@ -63,8 +63,8 @@ export const CommunityView = ({
         </div>
       </div>
 
-      {tab === 'career' ? (
-        <CareerView currentUser={currentUser} onLoginClick={onLoginClick} />
+      {tab === 'riset' ? (
+        <ResearchForumView currentUser={currentUser} onLoginClick={onLoginClick} />
       ) : (
         <AlumniConnectView
           currentUser={currentUser}

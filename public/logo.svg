@@ -1,0 +1,52 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <g id="gear">
+    <!-- 16 gear teeth, evenly spaced every 22.5 degrees -->
+    <g fill="#B80813">
+      <rect x="236" y="14" width="40" height="58" rx="6"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(22.5 256 256)"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(45 256 256)"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(67.5 256 256)"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(90 256 256)"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(112.5 256 256)"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(135 256 256)"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(157.5 256 256)"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(180 256 256)"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(202.5 256 256)"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(225 256 256)"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(247.5 256 256)"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(270 256 256)"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(292.5 256 256)"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(315 256 256)"/>
+      <rect x="236" y="14" width="40" height="58" rx="6" transform="rotate(337.5 256 256)"/>
+    </g>
+
+    <!-- Gear body disk -->
+    <circle cx="256" cy="256" r="196" fill="#B80813"/>
+  </g>
+
+  <!-- White inner circle (unchanged size/position from original) -->
+  <circle cx="256" cy="256" r="160" fill="#FFFFFF"/>
+
+  <!-- ALUMNI wordmark (unchanged size/position from original) -->
+  <text
+    id="wordmark"
+    x="256" y="175"
+    font-family="Helvetica, Arial, sans-serif"
+    font-size="42"
+    font-weight="700"
+    letter-spacing="2"
+    fill="#B80813"
+    text-anchor="middle"
+  >ALUMNI</text>
+
+  <!-- Big F letter (unchanged size/position from original) -->
+  <text
+    id="f-letter"
+    x="256" y="375"
+    font-family="Helvetica, Arial, sans-serif"
+    font-size="210"
+    font-weight="700"
+    fill="#B80813"
+    text-anchor="middle"
+  >F</text>
+</svg>

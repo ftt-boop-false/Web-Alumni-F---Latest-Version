@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Landmark, HandCoins, ShieldCheck, Users, Loader2, Check, Trash2, Heart, Sparkles } from 'lucide-react';
+import { TransparansiDashboard } from './TransparansiDashboard';
 
 interface WakafViewProps {
   currentUser: User | null;
@@ -225,6 +226,9 @@ export const WakafView = ({ currentUser, onLoginClick, onOpenFormulir }: WakafVi
             })}
           </div>
         </div>
+
+        {/* Dashboard transparansi (beasiswa & riset) */}
+        <TransparansiDashboard />
 
         {/* Panel Admin */}
         {isAdmin && (
